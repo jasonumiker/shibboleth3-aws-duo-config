@@ -43,5 +43,5 @@ The instructions on how to set up Shibboleth in this way are:
 1. Go to http://idp.mydomain.com/idp/profile/SAML2/Unsolicited/SSO?providerId=urn:amazon:webservices and it should work :)
 1. Create an ELB or ALB pointing HTTPS publicly to HTTP 8080 on your local server
     1. Ideally you can use the ACM service to generate/maintain the cert to terminate encryption
-    1. For bonus points you can create an IIS site on 80 that redirects / to /idp/profile/SAML2/Unsolicited/SSO?providerId=urn:amazon:webservices and then two ALB roles - one that sends / to 80 and everything else to 8080
+    1. For bonus points you can create an IIS site on 80 that redirects / to https://idp.mydomain.com/idp/profile/SAML2/Unsolicited/SSO?providerId=urn:amazon:webservices and then two ALB listener rules - one that sends / to 80 and everything else to 8080 on the backend
         1. That means you can go to https://idp.mydomain.com and it'll get you to the right place
