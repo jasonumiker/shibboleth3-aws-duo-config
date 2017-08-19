@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AttributeResolver
+        xmlns="urn:mace:shibboleth:2.0:resolver"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="urn:mace:shibboleth:2.0:resolver http://shibboleth.net/schema/idp/shibboleth-attribute-resolver.xsd">
+
+        <AttributeDefinition   id="awsRoleSessionName" xsi:type="Simple" sourceAttributeID="mail">
+                <Dependency ref="myLDAP"/>
+                <AttributeEncoder xsi:type="SAML2String"
+                        name="https://aws.amazon.com/SAML/Attributes/RoleSessionName"
+                        friendlyName="RoleSessionName" />
+        </AttributeDefinition>
+
+        <AttributeDefinition id="awsRoles" xsi:type="Mapped" sourceAttributeID="memberOf">
+                <Dependency ref="myLDAP" />
+                <AttributeEncoder xsi:type="SAML2String"
+                        name="https://aws.amazon.com/SAML/Attributes/Role"
+                        friendlyName="Role" encodeType="false" />
+                <ValueMap>
+                        <ReturnValue>arn:aws:iam::XXXXXXXXXXXX:saml-provider/Shibboleth,arn:aws:iam::XXXXXXXXXXXX:role/Shibboleth-$1</ReturnValue>
+                        <SourceValue>CN=AWS-([^,]*),.*</SourceValue>
+                </ValueMap>
+        </AttributeDefinition>
+
+        <DataConnector id="myLDAP" xsi:type="LDAPDirectory"
+                ldapURL="%{idp.attribute.resolver.LDAP.ldapURL}"
+                baseDN="%{idp.attribute.resolver.LDAP.baseDN}" 
+                principal="%{idp.attribute.resolver.LDAP.bindDN}"
+                principalCredential="%{idp.attribute.resolver.LDAP.bindDNCredential}"
+                connectTimeout="%{idp.attribute.resolver.LDAP.connectTimeout}"
+                responseTimeout="%{idp.attribute.resolver.LDAP.responseTimeout}">
+                <FilterTemplate>
+                <![CDATA[
+                        %{idp.attribute.resolver.LDAP.searchFilter}
+                ]]>
+                </FilterTemplate>
+                <ReturnAttributes>mail memberOf</ReturnAttributes>
+    </DataConnector>
+
+</AttributeResolver>
