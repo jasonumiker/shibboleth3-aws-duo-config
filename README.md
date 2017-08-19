@@ -26,8 +26,10 @@ The instructions on how to set up Shibboleth in this way are:
     1. Put the Duo properties in the duo.properties file
         1. The Application Secret or akey needs to be a random string at least 40 characters long.
             1. You can generate it with the following Python for example:
-                `import os, hashlib
-                print hashlib.sha1(os.urandom(32)).hexdigest()`
+                ```
+                import os, hashlib
+                print hashlib.sha1(os.urandom(32)).hexdigest()
+                ```
     1. In attribute-resolver.xml replace XXXXXXXXXXXX with your AWS Account Number
     1. In idp.properties update the entityId and scope with your domain name and the store and key passwords from the install's idp.properties
     1. In ldap.properties update the DOMAIN names and the bindDNCredential with your service account password
