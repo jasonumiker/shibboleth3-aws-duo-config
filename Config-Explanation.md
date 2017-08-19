@@ -27,6 +27,8 @@ Explanation for the config and its changes from defaults
     1. nonhttps.port change to 8080 to allow for an IIS or nginx to redirect / to the login URI
 1. Jetty/etc/jetty.xml
     1. In order to have a Load balancer in front of it you need to add
-    `<Call name="addCustomizer">
+    ```
+    <Call name="addCustomizer">
         <Arg><New class="org.eclipse.jetty.server.ForwardedRequestCustomizer"/></Arg>
-    </Call>`
+    </Call>
+    ```
