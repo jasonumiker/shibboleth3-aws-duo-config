@@ -1,7 +1,7 @@
 # shibboleth3-aws-duo-config
 This is a sample config for setting up Shibboleth v3 to federate with AWS via SAML with a Duo MFA enabled.
 
-It was developed on Windows with the options to install Jetty and Configure for Active Directory as described here:
+It was developed on Windows from this install package:
 https://wiki.shibboleth.net/confluence/display/IDP30/WindowsInstallation
 
 I am planning on also trying it on Linux using this containerised approach as a base next and will update this with any changes required to deploy that way instead:
