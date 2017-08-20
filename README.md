@@ -8,7 +8,7 @@ I am planning on also trying it on Linux using this containerised approach as a 
 https://github.com/Unicon/shibboleth-idp-dockerized 
 
 The instructions on how to set up Shibboleth in this way are:
-1. Have a working AD - I set AWS' Simple AD service for this with the CloudFormation template in this project
+1. Have a working AD - I used AWS' Simple AD service for this with the CloudFormation template in this project
     1. Set up the following in that directory:
         1. A user account for Shibboleth to validate users/groups (I used shibboleth_svc)
         1. A group for each role that you want users to be able to assume in AWS in the format AWS-Groupname
