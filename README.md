@@ -7,7 +7,9 @@ https://wiki.shibboleth.net/confluence/display/IDP30/WindowsInstallation
 I am planning on also trying it on Linux using this containerised approach as a base next and will update this with any changes required to deploy that way instead:
 https://github.com/Unicon/shibboleth-idp-dockerized 
 
-The instructions on how to set up Shibboleth in this way are:
+Once you have a working Shibboleth you can use this other project to use it to access the AWS CLI - https://github.com/jasonumiker/samlapi
+
+## Usage
 1. Have a working AD - I used AWS' Simple AD service for this with the CloudFormation template in this project
     1. Set up the following in that directory:
         1. A user account for Shibboleth to validate users/groups (I used shibboleth_svc)
