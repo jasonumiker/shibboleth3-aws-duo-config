@@ -3,7 +3,7 @@ Explanation for the config and its changes from defaults
 
 1. mfa-authn-config.xml
     1. Set this up this so that it validates the Password then moves on to Duo as a 2nd factor
-1. attribute-filter.xml - allow the necessary parameters to do the AWS federation
+1. attribute-filter.xml - allow the necessary attributes to enable the AWS federation
 1. attribute-resolver.xml
     1. AWS requires two attributes to be returned to it:
         1. awsRoleSessionName - we map this to the email from AD/LDAP
