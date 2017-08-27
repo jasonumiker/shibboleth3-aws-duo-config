@@ -13,7 +13,7 @@ Once you have a working Shibboleth you can use this other project to use it to a
 1. Have a working AD - I used AWS' Simple AD service for this with the CloudFormation template in this project
     1. Set up the following in that directory:
         1. A user account for Shibboleth to validate users/groups (I used shibboleth_svc)
-        1. A group for each role that you want users to be able to assume in AWS in the format AWS-Groupname
+        1. A group for each role that you want users to be able to assume in AWS in the format AWS-AccountNumber-Rolename
         1. Any users to use this need to have a valid email address on their account (it'll map to awsRoleSessionName)
 1. Have a working Duo account (the Duo Free up to 10 users is fine)
     1. In that account add a Shibboleth Application and note the Integration Key, Secret Key and Hostname
@@ -32,7 +32,6 @@ Once you have a working Shibboleth you can use this other project to use it to a
                 import os, hashlib
                 print hashlib.sha1(os.urandom(32)).hexdigest()
                 ```
-    1. In attribute-resolver.xml replace XXXXXXXXXXXX with your AWS Account Number
     1. In idp.properties update the entityId and scope with your domain name and the store and key passwords from the install's idp.properties
     1. In ldap.properties update the DOMAIN names and the bindDNCredential with your service account password
     1. In jetty-base/start.d/idp.ini update it with backchannel and browser keystore passwords from the install's idp.ini

@@ -12,6 +12,9 @@
                 <AttributeRule attributeID="awsRoles">
                         <PermitValueRule xsi:type="ANY" />
                 </AttributeRule>
+                <AttributeRule attributeID="awsSessionDuration">
+                        <PermitValueRule xsi:type="ANY" />
+                </AttributeRule>                
         </AttributeFilterPolicy>
 
 </AttributeFilterPolicyGroup>

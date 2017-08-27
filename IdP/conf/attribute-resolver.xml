@@ -17,9 +17,16 @@
                         name="https://aws.amazon.com/SAML/Attributes/Role"
                         friendlyName="Role" encodeType="false" />
                 <ValueMap>
-                        <ReturnValue>arn:aws:iam::XXXXXXXXXXXX:saml-provider/Shibboleth,arn:aws:iam::XXXXXXXXXXXX:role/Shibboleth-$1</ReturnValue>
-                        <SourceValue>CN=AWS-([^,]*),.*</SourceValue>
+                        <ReturnValue>arn:aws:iam::$1:saml-provider/Shibboleth,arn:aws:iam::$1:role/Shibboleth-$2</ReturnValue>
+                        <SourceValue>CN=AWS-([^-]*)-([^,]*),.*</SourceValue>
                 </ValueMap>
+        </AttributeDefinition>
+
+        <AttributeDefinition id="awsSessionDuration" xsi:type="Simple" sourceAttributeID="awsSessionDuration">
+                <Dependency ref="staticAttributes" />
+                <AttributeEncoder xsi:type="SAML2String" 
+                        name="https://aws.amazon.com/SAML/Attributes/SessionDuration" 
+                        friendlyName="awsSessionDuration" />
         </AttributeDefinition>
 
         <DataConnector id="myLDAP" xsi:type="LDAPDirectory"
@@ -35,6 +42,12 @@
                 ]]>
                 </FilterTemplate>
                 <ReturnAttributes>mail memberOf</ReturnAttributes>
-    </DataConnector>
+        </DataConnector>
+
+        <DataConnector id="staticAttributes" xsi:type="Static">
+                <Attribute id="awsSessionDuration">
+                        <Value>7200</Value>
+                </Attribute>
+        </DataConnector>
 
 </AttributeResolver>
