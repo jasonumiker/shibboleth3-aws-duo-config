@@ -18,5 +18,6 @@ WARNING: This means that anybody who can see the artefacts generated in customiz
     1. The Metadata XML to use was generated as part of the container build and will be in the customized-shibboleth-idp/metadata folder on the machine that did the build
 1. Create an ELB or ALB pointing HTTPS publicly to HTTP 8080 on your local server
     1. Ideally you can use the ACM service to generate/maintain the cert to terminate encryption
-    1. For bonus points you can create an nginx or Apache sidecar container listening on another port that redirects / to https://idp.mydomain.com/idp/profile/SAML2/Unsolicited/SSO?providerId=urn:amazon:webservices and then two ALB listener rules - one that sends / to the sidecar's port and everything else to 8080 on the backend
-        1. That means you can go to https://idp.mydomain.com and it'll get you to the right place
+1. (Optionally) Leverage the nginx_redirect conainer we built by:
+	1. Using an ALB to the root path (/) to 8888 on that container and it'll redirect you to the full path
+	1. Send everything else to the shibboleth container on 8080
