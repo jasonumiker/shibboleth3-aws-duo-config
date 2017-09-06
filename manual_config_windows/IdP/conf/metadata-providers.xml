@@ -14,7 +14,7 @@
         xsi:type="FileBackedHTTPMetadataProvider"
         xmlns="urn:mace:shibboleth:2.0:metadata"
         metadataURL="https://signin.aws.amazon.com/static/saml-metadata.xml"
-        backingFile="C:/Program Files (x86)/Shibboleth/IdP/metadata/aws-metadata.xml">
+        backingFile="%{idp.home}/metadata/aws-metadata.xml">
     </MetadataProvider>
 
 </MetadataProvider>
