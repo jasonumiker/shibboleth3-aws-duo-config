@@ -17,7 +17,7 @@
                         name="https://aws.amazon.com/SAML/Attributes/Role"
                         friendlyName="Role" encodeType="false" />
                 <ValueMap>
-                        <ReturnValue>arn:aws:iam::$1:saml-provider/shibtest,arn:aws:iam::$1:role/Shibboleth-$2</ReturnValue>
+                        <ReturnValue>arn:aws:iam::$1:saml-provider/Shibboleth,arn:aws:iam::$1:role/Shibboleth-$2</ReturnValue>
                         <SourceValue>CN=AWS-([^-]*)-([^,]*),.*</SourceValue>
                 </ValueMap>
         </AttributeDefinition>
