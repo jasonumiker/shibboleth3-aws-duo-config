@@ -4,7 +4,7 @@
 idp_hostname=idp.DOMAIN.com
 idp_attributescope=DOMAIN.com
 idp_ldapURL=ldap://ad.DOMAIN.com:389
-idp_ldapbaseDN=CN=Users, DC=ad, DC=DOMAIN, DC=com
+idp_ldapbaseDN="CN=Users, DC=ad, DC=DOMAIN, DC=com"
 idp_ldapbindDN=shibboleth@ad.DOMAIN.com
 idp_ldapbindDNCredential=PASSWORD
 idp_ldapdnFormat=%s@ad.DOMAIN.com
