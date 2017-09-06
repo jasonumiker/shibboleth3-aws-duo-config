@@ -12,6 +12,7 @@ idp_duo_apiHost=api-XXXXXXXX.duosecurity.com
 idp_duo_applicationKey=$(cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 40 | head -n 1)
 idp_duo_integrationKey=INTKEY
 idp_duo_secretKey=SECRETKEY
+buildpath=/home/ec2-user/shibboleth3-aws-duo-config/build_docker_confinimg
 
 #Pick a couple random 32 character passwords for the build phase
 idp_backchannel_password=$(cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
@@ -19,7 +20,7 @@ idp_cookie_password=$(cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fol
 
 #Clean up any previous builds
 docker rmi shibboleth
-cd /home/ec2-user/shibboleth
+cd $buildpath
 rm -rf customized-shibboleth-idp
 
 #Do the 1st stage Docker build to generate the IdP's keys
@@ -68,4 +69,5 @@ cp Dockerfile-stage2 customized-shibboleth-idp/Dockerfile
 cd customized-shibboleth-idp
 docker build -t shibboleth .
 
-#Set up the run.sh to start the container
+#Create the run.sh
+echo "docker run -d --name="shibboleth" --rm -p 8080:8080 -e JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD=$idp_backchannel_password shibboleth run-jetty.sh" > ../run.sh
