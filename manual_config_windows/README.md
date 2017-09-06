@@ -10,7 +10,7 @@ https://wiki.shibboleth.net/confluence/display/IDP30/WindowsInstallation
         1. A user account for Shibboleth to validate users/groups (I used shibboleth_svc)
         1. A group for each role that you want users to be able to assume in AWS in the format AWS-AccountNumber-Rolename
         1. Any users to use this need to have a valid email address on their account (it'll map to awsRoleSessionName)
-1. Have a working Duo account (the Duo Free up to 10 users is fine)
+1. Have a working Duo account (the Duo Free tier is fine)
     1. In that account add a Shibboleth Application and note the Integration Key, Secret Key and Hostname
 1. Install the appropriate Oracle Java runtime and set the JAVA_HOME environmental variable to point to the installation (My Computer->RightClick->Properties->Advanced System Settings->Environmental Variables->System Variables->New)
 1. Download the latest Shibboleth IdP from here and run the MSI - https://shibboleth.net/downloads/identity-provider/latest/
