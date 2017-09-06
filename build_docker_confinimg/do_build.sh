@@ -54,7 +54,7 @@ sed -i "/idp.authn.LDAP.authenticator /c\idp.authn.LDAP.authenticator= adAuthent
 sed -i "/idp.authn.LDAP.useStartTLS /c\idp.authn.LDAP.useStartTLS= false" customized-shibboleth-idp/conf/ldap.properties
 sed -i "/idp.authn.LDAP.useSSL /c\idp.authn.LDAP.useSSL= false" customized-shibboleth-idp/conf/ldap.properties
 sed -i "/idp.authn.LDAP.userFilter /c\idp.authn.LDAP.userFilter= (sAMAccountName={user})" customized-shibboleth-idp/conf/ldap.properties
-sed -i "/idp.attribute.resolver.LDAP.searchFilter /c\idp.attribute.resolver.LDAP.searchFilter= (sAMAccountName=$resolutionContext.principal)" customized-shibboleth-idp/conf/ldap.properties
+sed -i "/idp.attribute.resolver.LDAP.searchFilter /c\idp.attribute.resolver.LDAP.searchFilter= (sAMAccountName=\$resolutionContext.principal)" customized-shibboleth-idp/conf/ldap.properties
 sed -i "/idp.authn.LDAP.ldapURL /c\idp.authn.LDAP.ldapURL= $idp_ldapURL" customized-shibboleth-idp/conf/ldap.properties
 sed -i "/idp.authn.LDAP.baseDN /c\idp.authn.LDAP.baseDN= $idp_ldapbaseDN" customized-shibboleth-idp/conf/ldap.properties
 sed -i "/idp.authn.LDAP.bindDNCredential /c\idp.authn.LDAP.bindDNCredential= $idp_ldapbindDNCredential" customized-shibboleth-idp/conf/ldap.properties
