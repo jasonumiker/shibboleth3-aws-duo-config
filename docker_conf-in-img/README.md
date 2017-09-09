@@ -1,4 +1,4 @@
-# build_docker_confinimage
+# docker_conf-in-img
 These configs and scripts will re-configure an upstream Dockerized Shibboleth (https://github.com/Unicon/shibboleth-idp-dockerized) project to work with AWS and Duo. The config, including the secrets, will be then be embedded in the container image produced. 
 
 WARNING: This means that anybody who can see the artefacts generated in customized-shibboleth-idp on the system that did the build or can pull the image will get the "keys to the kingdom" and so this is very sensitive. The way I've leveraged it is to build the image on the host(s) running it for now until I do the work to externalise the state to S3 in a secure way and pull it at runtime as required. I might also leverage the Parameter Store for some of the config or secrets as well.
