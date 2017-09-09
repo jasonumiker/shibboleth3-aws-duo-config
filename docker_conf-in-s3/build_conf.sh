@@ -67,5 +67,12 @@ echo "idp.duo.secretKey = $idp_duo_secretKey" >> customized-shibboleth-idp/conf/
 #Compress up our config into a tgz for upload to S3
 tar -zvcf customized-shibboleth-idp.tgz customized-shibboleth-idp
 
+#Modify the redirect container
+sed -i "/return 301/c\             return 301 https://$idp_hostname/idp/profile$
+
+#Build the redirect container
+cd ../redirect_container
+docker build -t nginx_redirect .
+
 echo "Your backchannel keystore password is $idp_backchannel_password - you need to put this in the SSM Parameter Store as /shibboleth/backchannel-password"
 
