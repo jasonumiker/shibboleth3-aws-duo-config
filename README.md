@@ -17,6 +17,6 @@ WARNING: The in-image Dockerized config includes the secrets so you need to eith
 
 ## Future plans
 Things to come for this project include:
-1. Testing and parameters to handle connecting to MS AD servers instead of Simple AD
-1. Support for more MFA plugins/types including at least Google Authenticator
-1. Some CloudFormation templates to roll this out including both setting up EC2 instances to run this container or Deploying it to an ECS cluster
+1. Testing and parameters to handle connecting to MS AD servers instead of Simple AD (you'd likely have to set up a trust of the AD's certificates etc.)
+1. Support for more MFA plugins/types including at least Google Authenticator or opting-out of MFA to just use Passwords if you want
+1. CloudFormation templates to roll this out including one for setting up EC2 instances to run this container and another for Deploying it to ECS
