@@ -1,0 +1,6 @@
+FROM unicon/shibboleth-idp
+
+MAINTAINER jason.umiker@gmail.com
+
+ADD init-idp.sh /usr/local/bin
+ADD shibboleth-idp/ /opt/shibboleth-idp/
