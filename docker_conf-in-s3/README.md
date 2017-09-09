@@ -16,7 +16,7 @@ These configs and scripts will re-configure an upstream Dockerized Shibboleth (h
 1. Put the backchannel password into the EC2 SSM Parameter Store as /shibboleth/backchannel-password
 1. Build the container image by running build_runtime_image.sh and push that up to your registry of choice
 1. In AWS go to IAM -> Identity Providers and add a new SAML one called Shibboleth.
-    1. The Metadata XML to use was generated as part of the container build and will be in the customized-shibboleth-idp/metadata folder on the machine that did the build
+    1. The Metadata XML to use was generated as part of the container build and will be in the customized-shibboleth-idp/metadata folder on the machine that did the build as well as in the tgz file you put in S3 if that is no longer available.
 1. Create an ELB or ALB pointing HTTPS publicly to HTTP 8080 on your local server
     1. Ideally you can use the ACM service to generate/maintain the cert to terminate encryption
 1. (Optionally) Leverage the nginx_redirect conainer we built by:
