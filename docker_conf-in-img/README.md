@@ -19,5 +19,5 @@ WARNING: This means that anybody who can see the artefacts generated in customiz
 1. Create an ELB or ALB pointing HTTPS publicly to HTTP 8080 on your local server
     1. Ideally you can use the ACM service to generate/maintain the cert to terminate encryption
 1. (Optionally) Leverage the nginx_redirect conainer we built by:
-	1. Using an ALB to the root path (/) to 8888 on that container and it'll redirect you to the full path
-	1. Send everything else to the shibboleth container on 8080
+    1. Having a seperate ALB target group on the root path (/) pointing to 8888 on that container to 302 redirect you to the full path
+    1. Send everything else to the shibboleth container/service on 8080 via another target group
