@@ -47,7 +47,7 @@ EOF
 
 #Update the config the 1st build exported to meet our needs
 sed -i "/idp.encryption.optional/c\idp.encryption.optional= true" customized-shibboleth-idp/conf/idp.properties
-sed -i "/idp.authn.flows =/c\idp.authn.flows= MFA" customized-shibboleth-idp/conf/idp.properties
+sed -i "/idp.authn.flows= Password/c\idp.authn.flows= MFA" customized-shibboleth-idp/conf/idp.properties
 sed -i "/idp.footer =/c\idp.footer = Shibboleth Federated Identity Provider" customized-shibboleth-idp/system/messages/messages.properties
 sed -i "/root.footer =/c\root.footer = Shibboleth Federated Identity Provider" customized-shibboleth-idp/system/messages/messages.properties
 sed -i "/idp.authn.LDAP.authenticator /c\idp.authn.LDAP.authenticator= adAuthenticator" customized-shibboleth-idp/conf/ldap.properties
