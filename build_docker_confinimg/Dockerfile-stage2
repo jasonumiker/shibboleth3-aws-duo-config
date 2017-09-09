@@ -1,5 +1,0 @@
-FROM shibboleth
-
-MAINTAINER jason.umiker@gmail.com
-
-ADD . /opt/shibboleth-idp/
