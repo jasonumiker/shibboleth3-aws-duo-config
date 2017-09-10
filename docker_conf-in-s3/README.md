@@ -11,7 +11,7 @@ These configs and scripts will re-configure an upstream Dockerized Shibboleth (h
     1. In that account add a Shibboleth Application and note the Integration Key, Secret Key and Hostname
 1. Edit the build_conf.sh file and put the appropriate items into the variables at the top for your environment
 1. Run build_conf.sh as root or via sudo
-1. It will produce a config with the required certificates and configuration as well as tgz that up - put this in an S3 bucket restricted to the instance/task IAM role of the host/container
+1. It will produce a config with the required certificates and configuration as well as tgz that up - put that customized-shibboleth-idp.tgz in an S3 bucket restricted to the instance/task IAM role of the host/container
 1. Edit the run-jetty.sh file with the path for this container/file to pull at runtime
 1. Put the backchannel password into the EC2 SSM Parameter Store as /shibboleth/backchannel-password
 1. Build the container image by running build_runtime_image.sh and push that up to your registry of choice
