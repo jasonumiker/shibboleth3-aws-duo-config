@@ -1,5 +1,5 @@
 # shibboleth3-aws-duo-config
-This project is to help to deploy a Shibboleth IdP for SAML Federation and Single-Sign-On (SSO) to AWS with Duo two-factor enabled. 
+This project is to help to deploy a Shibboleth IdP for SAML Federation and Single Sign-On (SSO) to AWS with Duo two-factor MFA enabled. 
 
 ### Login Screen (with your AD credentials)
 ![login](login.PNG)
