@@ -15,7 +15,7 @@ There are three methods I've documented or automated so far:
 1. You can use the scripts and configuration files in docker_conf-in-img project to build a Linux Docker image with all the configs required embedded in the image.
 1. You can externalise the configuration and secrets to S3 and Parameter store and build a container that will pull them at runtime by using docker_conf-in-s3.
 
-WARNING: The in-image Dockerized config includes the secrets so you need to either do this build locally on the machine that will run the container/service or secure the pulling of the image to trusted individuals. The private keys in this config can be exploited to get extensive AWS access if leaked. These keys will also be in the customized-shibboleth-idp folder that is part of the build process on the server that did the build so clean them up afterward if required for safety.
+**WARNING**: The in-image Dockerized config includes the secrets so you need to either do this build locally on the machine that will run the container/service or secure the pulling of the image to trusted individuals. The private keys in this config can be exploited to get extensive AWS access if leaked. These keys will also be in the customized-shibboleth-idp folder that is part of the build process on the server that did the build so clean them up afterward if required for safety.
 
 ## Assumptions
 1. I built this against a Simple AD which does not use SSL to secure the LDAP communication involved for example. The LDAP config against a 'true' MS AD server will likely require some changes.
