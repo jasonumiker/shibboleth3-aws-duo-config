@@ -1,10 +1,10 @@
 # shibboleth3-aws-duo-config
 This project is to help to deploy a Shibboleth IdP for SAML Federation and Single-Sign-On (SSO) to AWS with Duo two-factor enabled. 
 
-##Login Screen (with your AD credentials)
+## Login Screen (with your AD credentials)
 ![login](login.PNG)
 
-##Duo 2nd Authentication Factor
+## Duo 2nd Authentication Factor
 ![duo](duo.PNG)
 
 Once you have a working Shibboleth you can use this other project I've been working on to access the AWS CLI via the IdP with the 2nd factor as well - https://github.com/jasonumiker/samlapi
