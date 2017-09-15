@@ -19,8 +19,8 @@ There are three methods I've documented or automated so far:
 
 ## Assumptions
 1. I have tried this against both the Simple AD and a MS AD versions of the AWS Directory Service. It should work against any AD server via LDAP but I have not tested against a self-managed AD server on EC2.
-  1. Using LDAP rather than LDAPS over unsecured networks is problematic but doing it within the same VPC especially if access is restricted to between the Shibboleth and AD via security groups should be fine.
-    1. Not to mention that for reliability reasons there should be a replica of your directory within the AWS VPC(s) near the Shibbolth IdP anyway.
+    1. Using LDAP rather than LDAPS over unsecured networks is problematic but doing it within the same VPC especially if access is restricted to between the Shibboleth and AD via security groups should be fine.
+      1. Not to mention that for reliability reasons there should be a replica of your directory within the AWS VPC(s) near the Shibbolth IdP anyway.
 1. I leveraged the built-in Duo MFA plugin in the Shibboleth so the assumption is that you want to leverage Duo at the moment. They do support other MFA types via plugins and I have not yet explored that.
 
 ## Future plans
