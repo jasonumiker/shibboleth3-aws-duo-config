@@ -76,7 +76,7 @@ echo "docker run -d --name"nginx_redirect" --rm -p 8888:80 nginx_redirect" >> ..
 chmod u+x ../run.sh
 
 #Modify the redirect container
-sed -i "/return 301/c\                return 301 https://idp.DOMAIN.com/idp/profile/SAML2/Unsolicited/SSO?providerId=urn
+sed -i "/return 301/c\                return 301 https://$idp_hostname/idp/profile/SAML2/Unsolicited/SSO?providerId=urn
 :amazon:webservices;"
 
 #Build the redirect container
