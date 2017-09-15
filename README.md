@@ -18,11 +18,12 @@ There are three methods I've documented or automated so far:
 **WARNING**: The in-image Dockerized config includes the secrets so you need to either do this build locally on the machine that will run the container/service or secure the pulling of the image to trusted individuals. The private keys in this config can be exploited to get extensive AWS access if leaked. These keys will also be in the customized-shibboleth-idp folder that is part of the build process on the server that did the build so clean them up afterward if required for safety.
 
 ## Assumptions
-1. I built this against a Simple AD which does not use SSL to secure the LDAP communication involved for example. The LDAP config against a 'true' MS AD server will likely require some changes.
+1. I have tried this against both the Simple AD and a MS AD versions of the AWS Directory Service. It should work against any AD server via LDAP but I have not tested against a self-managed AD server on EC2.
+  1. Using LDAP rather than LDAPS over unsecured networks is problematic but doing it within the same VPC especially if access is restricted to between the Shibboleth and AD via security groups should be fine.
+    1. Not to mention that for reliability reasons there should be a replica of your directory within the AWS VPC(s) near the Shibbolth IdP anyway.
 1. I leveraged the built-in Duo MFA plugin in the Shibboleth so the assumption is that you want to leverage Duo at the moment. They do support other MFA types via plugins and I have not yet explored that.
 
 ## Future plans
 Things to come for this project include:
-1. Testing and parameters to handle connecting to MS AD servers instead of Simple AD (you'd likely have to set up a trust of the AD's certificates etc.)
 1. Support for more MFA plugins/types including at least Google Authenticator or opting-out of MFA to just use Passwords if you want
 1. CloudFormation templates to roll this out including one for setting up EC2 instances to run this container and another for Deploying it to ECS
