@@ -23,7 +23,7 @@ There are three methods I've documented or automated so far:
         1. Not to mention that for reliability reasons there should be a replica of your directory within the AWS VPC(s) near the Shibbolth IdP anyway.
 1. I leveraged the built-in Duo MFA plugin in the Shibboleth so the assumption is that you want to leverage Duo at the moment. They do support other MFA types via plugins and I have not yet explored that.
 1. The default configuration for Shibboleth allows for High(ish) Availability by storing nearly everything on the client browser side as described here - https://wiki.shibboleth.net/confluence/display/IDP30/Clustering#Clustering-DefaultIdPConfiguration. So you can have multiple IdPs behind a LB and it works.
-    1.The one issue with the default configuration is that during the login process some of the flow state is on a node so they encourage a little stickiness on the load balancer side such that a client's login will complete on the same node that it started on. I have enabled stickiness on my ALB to facilitate this.
+    1. The one issue with the default configuration is that during the login process some of the flow state is on a node so they encourage a little stickiness on the load balancer side such that a client's login will complete on the same node that it started on. I have enabled stickiness on my ALB to facilitate this.
 
 ## Future plans
 Things to come for this project include:
