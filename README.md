@@ -31,3 +31,6 @@ Things to come for this project include:
 1. CloudFormation templates to roll this out including one for setting up EC2 instances to run this container and another for Deploying it to ECS
 1. Enable Kerberos login instead of username/password using SPNEGO - https://wiki.shibboleth.net/confluence/display/IDP30/SPNEGOAuthnConfiguration
 1. Set up the IdP to externalise its state to an RDS or ElastiCache to remove the need for ALB stickiness
+
+## Acknowledgement
+I'd like to thank John Gasper and Unicon for a great starting point for my efforts with their image/project I use as the base for this (https://github.com/Unicon/shibboleth-idp-dockerized).
