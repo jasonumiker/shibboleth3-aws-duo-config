@@ -67,7 +67,7 @@ tar -zvcf customized-shibboleth-idp.tgz customized-shibboleth-idp
 
 #Modify the redirect container
 sed -i "/return 301/c\                return 301 https://$idp_hostname/idp/profile/SAML2/Unsolicited/SSO?providerId=urn
-:amazon:webservices;"
+:amazon:webservices;" ../redirect_container/bounce.conf
 
 #Build the redirect container
 cd ../redirect_container

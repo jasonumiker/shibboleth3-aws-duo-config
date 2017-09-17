@@ -72,12 +72,12 @@ docker build -t shibboleth .
 
 #Create the run.sh
 echo "docker run -d --name="shibboleth" --rm -p 8080:8080 -e JETTY_BACKCHANNEL_SSL_KEYSTORE_PASSWORD=$idp_backchannel_password shibboleth run-jetty.sh" > ../run.sh
-echo "docker run -d --name"nginx_redirect" --rm -p 8888:80 nginx_redirect" >> ../run.sh
+echo "docker run -d --name="nginx_redirect" --rm -p 8888:80 nginx_redirect" >> ../run.sh
 chmod u+x ../run.sh
 
 #Modify the redirect container
 sed -i "/return 301/c\                return 301 https://$idp_hostname/idp/profile/SAML2/Unsolicited/SSO?providerId=urn
-:amazon:webservices;"
+:amazon:webservices;" ../redirect_container/bounce.conf
 
 #Build the redirect container
 cd ../redirect_container
