@@ -20,11 +20,6 @@ idp_cookie_password=$(cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fol
 #Pick a random 40 character application key for Duo
 idp_duo_applicationKey=$(cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 40 | head -n 1)
 
-#Clean up any previous builds
-cd $buildpath
-rm -rf customized-shibboleth-idp
-rm -rf customized-shibboleth-idp-new.tgz
-
 #Do the 1st stage Docker build to generate the IdP's keys
 docker build -f Dockerfile-config -t shibboleth-conf .
 expect - <<EOF
