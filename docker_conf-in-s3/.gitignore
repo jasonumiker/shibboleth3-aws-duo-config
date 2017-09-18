@@ -3,3 +3,4 @@ build_runtime_image_myconf.sh
 customized-shibboleth-idp/*
 customized-shibboleth-idp.tgz
 run.sh
+set_env.sh
