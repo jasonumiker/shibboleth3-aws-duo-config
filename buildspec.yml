@@ -1,3 +1,4 @@
+# AWS CodeBuild buildspec to build the Shibboleth runtime container
 # This requires the following environment variables be set on the Project:
 # AWS_DEFAULT_REGION
 # AWS_ACCOUNT_ID
