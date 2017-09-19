@@ -62,15 +62,15 @@ echo "idp.duo.applicationKey = $idp_duo_applicationKey" >> customized-shibboleth
 echo "idp.duo.integrationKey = $idp_duo_integrationKey" >> customized-shibboleth-idp/conf/authn/duo.properties
 
 #Compress up our config into a tgz for upload to S3
-tar -zvcf customized-shibboleth-idp-new.tgz customized-shibboleth-idp
+tar -zvcf customized-shibboleth-idp.tgz customized-shibboleth-idp
 
 #Upload our config to S3
-aws s3 cp customized-shibboleth-idp-new.tgz $s3path
-aws s3 cp customized-shibboleth-idp/metadata/idp-metadata.xml $s3path/idp-metadata-new.xml
+aws s3 cp customized-shibboleth-idp.tgz $s3path
+aws s3 cp customized-shibboleth-idp/metadata/idp-metadata.xml $s3path
 
 #Store our secrets in Parameter Store
-aws --region $awsregion ssm put-parameter --name "/shibboleth/backchannel-password-new" --type "SecureString" --value $idp_backchannel_password --overwrite
-aws --region $awsregion ssm put-parameter --name "/shibboleth/sealer-password-new" --type "SecureString" --value $idp_cookie_password --overwrite
+aws --region $awsregion ssm put-parameter --name "/shibboleth/backchannel-password" --type "SecureString" --value $idp_backchannel_password --overwrite
+aws --region $awsregion ssm put-parameter --name "/shibboleth/sealer-password" --type "SecureString" --value $idp_cookie_password --overwrite
 
 #Clean up our config on the build server
 rm -rf customized-shibboleth-id*
