@@ -5,6 +5,7 @@ phases:
     commands:
       - echo Build started on `date`
       - echo Building the configuration
+      - apt-get update
       - apt-get install -y expect
       - cd docker_conf-in-s3
       - ./build_conf_codebuild.sh
