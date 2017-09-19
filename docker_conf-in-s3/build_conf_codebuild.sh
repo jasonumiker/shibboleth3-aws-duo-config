@@ -9,7 +9,6 @@
 #idp_ldapdnFormat=%s@ad.DOMAIN.com
 #idp_duo_apiHost=api-XXXXXXXX.duosecurity.com
 #idp_duo_integrationKey=
-#buildpath=/home/ec2-user/shibboleth3-aws-duo-config/build_docker_confins3
 #s3path=s3://jumiker-shibboleth-config/
 #awsregion=ap-southeast-2
 
