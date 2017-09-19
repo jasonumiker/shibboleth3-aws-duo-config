@@ -14,6 +14,7 @@ There are three methods I've documented or automated so far:
 1. You can install the package on a Windows server and then manually modify the configuration files as described in the manual_config_windows folder. This config should mostly work on Linux as well but the paths are slightly different there.
 1. You can use the scripts and configuration files in docker_conf-in-img project to build a Linux Docker image with all the configs required embedded in the image.
 1. You can externalise the configuration and secrets to S3 and Parameter store and build a container that will pull them at runtime by using docker_conf-in-s3.
+    1. You can build both this config and upload it to S3 and PS using AWS CodeBuild with the buildspec_conf.yml and the runtime container with buildspec.yml.
 
 **WARNING**: The in-image Dockerized config includes the secrets so you need to either do this build locally on the machine that will run the container/service or secure the pulling of the image to trusted individuals. The private keys in this config can be exploited to get extensive AWS access if leaked. These keys will also be in the customized-shibboleth-idp folder that is part of the build process on the server that did the build so clean them up afterward if required for safety.
 
@@ -27,9 +28,8 @@ There are three methods I've documented or automated so far:
 
 ## Future plans
 Things to come for this project include:
+1. CloudFormation templates to roll this all out including the CodeBuild and getting it running on ECS or on raw EC2
 1. Support for more MFA plugins/types including at least Google Authenticator or opting-out of MFA to just use Passwords if you want
-1. CloudFormation templates to roll this out including one for setting up EC2 instances to run this container and another for Deploying it to ECS
-1. A Codebuild config to allow you to build the config and container automagically
 1. Enable Kerberos login instead of username/password using SPNEGO - https://wiki.shibboleth.net/confluence/display/IDP30/SPNEGOAuthnConfiguration
 1. Set up the IdP to externalise its state to an RDS or ElastiCache to remove the need for ALB stickiness
 
