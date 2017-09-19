@@ -1,3 +1,15 @@
+# This requires the following environment variables be set on the Project:
+#idp_hostname=idp.DOMAIN.com
+#idp_attributescope=DOMAIN.com
+#idp_ldapURL=ldap://ad.DOMAIN.com:389
+#idp_ldapbaseDN="CN=Users, DC=ad, DC=DOMAIN, DC=com"
+#idp_ldapbindDN=shibboleth_svc@ad.DOMAIN.com
+#idp_ldapdnFormat=%s@ad.DOMAIN.com
+#idp_duo_apiHost=api-XXXXXXXX.duosecurity.com
+#idp_duo_integrationKey=
+#s3path=s3://DOMAIN-shibboleth-config/
+#awsregion=ap-southeast-2
+
 version: 0.2
 
 phases:
