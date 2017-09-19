@@ -6,7 +6,7 @@ phases:
       - echo Build started on `date`
       - echo Building the configuration          
       - cd docker_conf-in-s3
-      - build_conf_codebuild.sh
+      - ./build_conf_codebuild.sh
   post_build:
     commands:
       - echo Build completed on `date` 
