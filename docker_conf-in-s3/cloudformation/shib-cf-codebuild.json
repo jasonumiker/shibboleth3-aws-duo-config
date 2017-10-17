@@ -1,0 +1,389 @@
+{
+    "Description": "Template to deploy a Dockerised Shibboleth IdP Build Environment",
+    "Outputs": {
+        "RepositoryURL": {
+            "Description": "The docker repository URL",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        {
+                            "Ref": "AWS::AccountId"
+                        },
+                        ".dkr.ecr.",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        ".amazonaws.com/",
+                        {
+                            "Ref": "Repository"
+                        }
+                    ]
+                ]
+            }
+        },
+        "ShibbolethConfigBucketName": {
+            "Description": "Name of S3 bucket to hold Shibboleth Config",
+            "Value": {
+                "Ref": "ConfigBucket"
+            }
+        }
+    },
+    "Parameters": {
+        "idpattributescope": {
+            "Description": "Domain Name of the AD (ad.example.com)",
+            "Type": "String"
+        },
+        "idpduoapiHost": {
+            "Description": "API endpoint location from Duo",
+            "Type": "String"
+        },
+        "idpduointegrationKey": {
+            "Description": "Integration Key from Duo",
+            "Type": "String"
+        },
+        "idphostname": {
+            "Description": "FQDN of the IdP (idp.example.com)",
+            "Type": "String"
+        },
+        "idpldapURL": {
+            "Description": "LDAP connection string (ldap://ad.example.com:389)",
+            "Type": "String"
+        },
+        "idpldapbaseDN": {
+            "Description": "LDAP root path where users live (\"CN=Users, DC=ad, DC=example, DC=com\")",
+            "Type": "String"
+        },
+        "idpldapbindDN": {
+            "Description": "Username to log into LDAP (shib_svc@ad.example.com)",
+            "Type": "String"
+        },
+        "idpldapdnFormat": {
+            "Description": "How to convert username to fully qualified name (%s@ad.example.com)",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "ConfigBucket": {
+            "Type": "AWS::S3::Bucket"
+        },
+        "ConfigBuildProject": {
+            "Properties": {
+                "Artifacts": {
+                    "Type": "NO_ARTIFACTS"
+                },
+                "Environment": {
+                    "ComputeType": "BUILD_GENERAL1_SMALL",
+                    "EnvironmentVariables": [
+                        {
+                            "Name": "idp_hostname",
+                            "Value": {
+                                "Ref": "idphostname"
+                            }
+                        },
+                        {
+                            "Name": "idp_attributescope",
+                            "Value": {
+                                "Ref": "idpattributescope"
+                            }
+                        },
+                        {
+                            "Name": "idp_ldapURL",
+                            "Value": {
+                                "Ref": "idpldapURL"
+                            }
+                        },
+                        {
+                            "Name": "idp_ldapbaseDN",
+                            "Value": {
+                                "Ref": "idpldapbaseDN"
+                            }
+                        },
+                        {
+                            "Name": "idp_ldapbindDN",
+                            "Value": {
+                                "Ref": "idpldapbindDN"
+                            }
+                        },
+                        {
+                            "Name": "idp_ldapdnFormat",
+                            "Value": {
+                                "Ref": "idpldapdnFormat"
+                            }
+                        },
+                        {
+                            "Name": "idp_duo_apiHost",
+                            "Value": {
+                                "Ref": "idpduoapiHost"
+                            }
+                        },
+                        {
+                            "Name": "idp_duo_integrationKey",
+                            "Value": {
+                                "Ref": "idpduointegrationKey"
+                            }
+                        },
+                        {
+                            "Name": "s3path",
+                            "Value": {
+                                "Ref": "ConfigBucket"
+                            }
+                        },
+                        {
+                            "Name": "awsregion",
+                            "Value": {
+                                "Ref": "AWS::Region"
+                            }
+                        }
+                    ],
+                    "Image": "aws/codebuild/docker:1.12.1",
+                    "PrivilegedMode": "true",
+                    "Type": "LINUX_CONTAINER"
+                },
+                "Name": "shibboleth-config-build",
+                "ServiceRole": {
+                    "Ref": "InstanceRole"
+                },
+                "Source": {
+                    "BuildSpec": "buildspec_conf.yml",
+                    "Location": "https://github.com/jasonumiker/shibboleth3-aws-duo-config",
+                    "Type": "GITHUB"
+                }
+            },
+            "Type": "AWS::CodeBuild::Project"
+        },
+        "ECRAccessPolicy": {
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "ecr:GetAuthorizationToken"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                "*"
+                            ]
+                        },
+                        {
+                            "Action": [
+                                "ecr:*"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:ecr:",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            ":",
+                                            {
+                                                "Ref": "AWS::AccountId"
+                                            },
+                                            ":repository/",
+                                            {
+                                                "Ref": "Repository"
+                                            }
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "shibboleth-ecr"
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "ImageBuildProject": {
+            "Properties": {
+                "Artifacts": {
+                    "Type": "NO_ARTIFACTS"
+                },
+                "Environment": {
+                    "ComputeType": "BUILD_GENERAL1_SMALL",
+                    "EnvironmentVariables": [
+                        {
+                            "Name": "AWS_DEFAULT_REGION",
+                            "Value": "ap-southeast-2"
+                        },
+                        {
+                            "Name": "AWS_ACCOUNT_ID",
+                            "Value": {
+                                "Ref": "AWS::AccountId"
+                            }
+                        },
+                        {
+                            "Name": "IMAGE_REPO_NAME",
+                            "Value": {
+                                "Ref": "Repository"
+                            }
+                        },
+                        {
+                            "Name": "IMAGE_TAG",
+                            "Value": "latest"
+                        }
+                    ],
+                    "Image": "aws/codebuild/docker:1.12.1",
+                    "PrivilegedMode": "true",
+                    "Type": "LINUX_CONTAINER"
+                },
+                "Name": "shibboleth-build",
+                "ServiceRole": {
+                    "Ref": "InstanceRole"
+                },
+                "Source": {
+                    "Location": "https://github.com/jasonumiker/shibboleth3-aws-duo-config",
+                    "Type": "GITHUB"
+                }
+            },
+            "Type": "AWS::CodeBuild::Project"
+        },
+        "InstanceRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "Ref": "ECRAccessPolicy"
+                    },
+                    {
+                        "Ref": "S3AccessPolicy"
+                    },
+                    {
+                        "Ref": "PSAccessPolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "PSAccessPolicy": {
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "ssm:GetParameters",
+                                "ssm:ssm:PutParameter",
+                                "ssm:DescribeParameters"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                "arn:aws:ssm:*:*:parameter/shibboleth/*"
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "shibboelth-ps"
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "Repository": {
+            "Type": "AWS::ECR::Repository"
+        },
+        "RepositoryURL": {
+            "Description": "The docker repository URL",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        {
+                            "Ref": "AWS::AccountId"
+                        },
+                        ".dkr.ecr.",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        ".amazonaws.com/",
+                        {
+                            "Ref": "Repository"
+                        }
+                    ]
+                ]
+            }
+        },
+        "S3AccessPolicy": {
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "s3:Get*",
+                                "s3:List*",
+                                "s3:PutObject",
+                                "s3:DeleteObject"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::",
+                                            {
+                                                "Ref": "ConfigBucket"
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "shibboleth-s3"
+            },
+            "Type": "AWS::IAM::Policy"
+        },
+        "TaskRole": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ecs-tasks.amazonaws.com"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "Ref": "ECRAccessPolicy"
+                    },
+                    {
+                        "Ref": "S3AccessPolicy"
+                    },
+                    {
+                        "Ref": "PSAccessPolicy"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Role"
+        }
+    }
+}
