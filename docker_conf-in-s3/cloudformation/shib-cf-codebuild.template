@@ -30,40 +30,99 @@
         }
     },
     "Parameters": {
-        "idpattributescope": {
+        "attributescope": {
             "Description": "Domain Name of the AD (ad.example.com)",
             "Type": "String"
         },
-        "idpduoapiHost": {
+        "duoapiHost": {
             "Description": "API endpoint location from Duo",
             "Type": "String"
         },
-        "idpduointegrationKey": {
+        "duointegrationKey": {
             "Description": "Integration Key from Duo",
             "Type": "String"
         },
-        "idphostname": {
+        "hostname": {
             "Description": "FQDN of the IdP (idp.example.com)",
-            "Type": "String"
-        },
-        "idpldapURL": {
-            "Description": "LDAP connection string (ldap://ad.example.com:389)",
             "Type": "String"
         },
         "idpldapbaseDN": {
             "Description": "LDAP root path where users live (\"CN=Users, DC=ad, DC=example, DC=com\")",
             "Type": "String"
         },
-        "idpldapbindDN": {
+        "ldapURL": {
+            "Description": "LDAP connection string (ldap://ad.example.com:389)",
+            "Type": "String"
+        },
+        "ldapbindDN": {
             "Description": "Username to log into LDAP (shib_svc@ad.example.com)",
             "Type": "String"
         },
-        "idpldapdnFormat": {
+        "ldapdnFormat": {
             "Description": "How to convert username to fully qualified name (%s@ad.example.com)",
             "Type": "String"
         }
     },
     "Resources": {
+        "CodeBuildServiceRolePolicy": {
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                "*"
+                            ],
+                            "Sid": "CloudWatchLogsPolicy"
+                        },
+                        {
+                            "Action": [
+                                "codecommit:GitPull"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                "*"
+                            ],
+                            "Sid": "CodeCommitPolicy"
+                        },
+                        {
+                            "Action": [
+                                "s3:GetObject",
+                                "s3:GetObjectVersion"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                "*"
+                            ],
+                            "Sid": "S3GetObjectPolicy"
+                        },
+                        {
+                            "Action": [
+                                "s3:PutObject"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                "*"
+                            ],
+                            "Sid": "S3PutObjectPolicy"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "CodeBuildServiceRolePolicy",
+                "Roles": [
+                    {
+                        "Ref": "InstanceRole"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::Policy"
+        },
         "ConfigBucket": {
             "Type": "AWS::S3::Bucket"
         },
@@ -78,19 +137,19 @@
                         {
                             "Name": "idp_hostname",
                             "Value": {
-                                "Ref": "idphostname"
+                                "Ref": "hostname"
                             }
                         },
                         {
                             "Name": "idp_attributescope",
                             "Value": {
-                                "Ref": "idpattributescope"
+                                "Ref": "attributescope"
                             }
                         },
                         {
                             "Name": "idp_ldapURL",
                             "Value": {
-                                "Ref": "idpldapURL"
+                                "Ref": "ldapURL"
                             }
                         },
                         {
@@ -102,25 +161,25 @@
                         {
                             "Name": "idp_ldapbindDN",
                             "Value": {
-                                "Ref": "idpldapbindDN"
+                                "Ref": "ldapbindDN"
                             }
                         },
                         {
                             "Name": "idp_ldapdnFormat",
                             "Value": {
-                                "Ref": "idpldapdnFormat"
+                                "Ref": "ldapdnFormat"
                             }
                         },
                         {
                             "Name": "idp_duo_apiHost",
                             "Value": {
-                                "Ref": "idpduoapiHost"
+                                "Ref": "duoapiHost"
                             }
                         },
                         {
                             "Name": "idp_duo_integrationKey",
                             "Value": {
-                                "Ref": "idpduointegrationKey"
+                                "Ref": "duointegrationKey"
                             }
                         },
                         {
@@ -195,11 +254,20 @@
                     ],
                     "Version": "2012-10-17"
                 },
-                "PolicyName": "shibboleth-ecr"
+                "PolicyName": "shibboleth-ecr",
+                "Roles": [
+                    {
+                        "Ref": "InstanceRole"
+                    },
+                    {
+                        "Ref": "TaskRole"
+                    }
+                ]
             },
             "Type": "AWS::IAM::Policy"
         },
         "ImageBuildProject": {
+            "DependsOn": "CodeBuildServiceRolePolicy",
             "Properties": {
                 "Artifacts": {
                     "Type": "NO_ARTIFACTS"
@@ -248,29 +316,14 @@
                 "AssumeRolePolicyDocument": {
                     "Statement": [
                         {
-                            "Action": [
-                                "sts:AssumeRole"
-                            ],
+                            "Action": "sts:AssumeRole",
                             "Effect": "Allow",
                             "Principal": {
-                                "Service": [
-                                    "ec2.amazonaws.com"
-                                ]
+                                "Service": "codebuild.amazonaws.com"
                             }
                         }
                     ]
-                },
-                "Policies": [
-                    {
-                        "Ref": "ECRAccessPolicy"
-                    },
-                    {
-                        "Ref": "S3AccessPolicy"
-                    },
-                    {
-                        "Ref": "PSAccessPolicy"
-                    }
-                ]
+                }
             },
             "Type": "AWS::IAM::Role"
         },
@@ -281,7 +334,7 @@
                         {
                             "Action": [
                                 "ssm:GetParameters",
-                                "ssm:ssm:PutParameter",
+                                "ssm:PutParameter",
                                 "ssm:DescribeParameters"
                             ],
                             "Effect": "Allow",
@@ -292,33 +345,20 @@
                     ],
                     "Version": "2012-10-17"
                 },
-                "PolicyName": "shibboelth-ps"
+                "PolicyName": "shibboelth-ps",
+                "Roles": [
+                    {
+                        "Ref": "InstanceRole"
+                    },
+                    {
+                        "Ref": "TaskRole"
+                    }
+                ]
             },
             "Type": "AWS::IAM::Policy"
         },
         "Repository": {
             "Type": "AWS::ECR::Repository"
-        },
-        "RepositoryURL": {
-            "Description": "The docker repository URL",
-            "Value": {
-                "Fn::Join": [
-                    "",
-                    [
-                        {
-                            "Ref": "AWS::AccountId"
-                        },
-                        ".dkr.ecr.",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        ".amazonaws.com/",
-                        {
-                            "Ref": "Repository"
-                        }
-                    ]
-                ]
-            }
         },
         "S3AccessPolicy": {
             "Properties": {
@@ -350,7 +390,15 @@
                     ],
                     "Version": "2012-10-17"
                 },
-                "PolicyName": "shibboleth-s3"
+                "PolicyName": "shibboleth-s3",
+                "Roles": [
+                    {
+                        "Ref": "InstanceRole"
+                    },
+                    {
+                        "Ref": "TaskRole"
+                    }
+                ]
             },
             "Type": "AWS::IAM::Policy"
         },
@@ -370,18 +418,7 @@
                             }
                         }
                     ]
-                },
-                "Policies": [
-                    {
-                        "Ref": "ECRAccessPolicy"
-                    },
-                    {
-                        "Ref": "S3AccessPolicy"
-                    },
-                    {
-                        "Ref": "PSAccessPolicy"
-                    }
-                ]
+                }
             },
             "Type": "AWS::IAM::Role"
         }

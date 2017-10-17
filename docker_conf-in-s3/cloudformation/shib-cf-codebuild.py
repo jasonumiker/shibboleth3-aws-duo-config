@@ -13,19 +13,19 @@ t.add_description("Template to deploy a Dockerised Shibboleth IdP "
 
 # Get the required Parameters
 idp_hostname = t.add_parameter(Parameter(
-    "idphostname",
+    "hostname",
     Description="FQDN of the IdP (idp.example.com)",
     Type="String"
 ))
 
 idp_attributescope = t.add_parameter(Parameter(
-    "idpattributescope",
+    "attributescope",
     Description="Domain Name of the AD (ad.example.com)",
     Type="String"
 ))
 
 idp_ldapURL = t.add_parameter(Parameter(
-    "idpldapURL",
+    "ldapURL",
     Description="LDAP connection string (ldap://ad.example.com:389)",
     Type="String"
 ))
@@ -37,25 +37,25 @@ idp_ldapbaseDN = t.add_parameter(Parameter(
 ))
 
 idp_ldapbindDN = t.add_parameter(Parameter(
-    "idpldapbindDN",
+    "ldapbindDN",
     Description="Username to log into LDAP (shib_svc@ad.example.com)",
     Type="String"
 ))
 
 idp_ldapdnFormat = t.add_parameter(Parameter(
-    "idpldapdnFormat",
+    "ldapdnFormat",
     Description="How to convert username to fully qualified name (%s@ad.example.com)",
     Type="String"
 ))
 
 idp_duo_apiHost = t.add_parameter(Parameter(
-    "idpduoapiHost",
+    "duoapiHost",
     Description="API endpoint location from Duo",
     Type="String"
 ))
 
 idp_duo_integrationKey = t.add_parameter(Parameter(
-    "idpduointegrationKey",
+    "duointegrationKey",
     Description="Integration Key from Duo",
     Type="String"
 ))
@@ -74,7 +74,36 @@ S3Bucket = t.add_resource(
     )
 )
 
-# Create the IAM Roles and Policies
+# Create instance/task roles
+# Instance Role
+InstanceRole = t.add_resource(iam.Role(
+    "InstanceRole",
+    AssumeRolePolicyDocument={
+        'Statement': [{
+            'Effect': 'Allow',
+            'Principal': {'Service': ['ec2.amazonaws.com']},
+            'Action': ["sts:AssumeRole"]
+        }],
+        'Statement': [{
+            'Effect': 'Allow',
+            'Principal': {'Service': 'codebuild.amazonaws.com'},
+            "Action": "sts:AssumeRole"
+        }]
+    },
+))
+
+# Task Role
+TaskRole = t.add_resource(iam.Role(
+    "TaskRole",
+    AssumeRolePolicyDocument={
+        'Statement': [{
+            'Effect': 'Allow',
+            'Principal': {'Service': ['ecs-tasks.amazonaws.com']},
+            'Action': ["sts:AssumeRole"]
+        }]},
+))
+
+# Create the Policies and associate them with the above roles
 # Policy to read/write to the ECR Repository
 ECRAccessPolicy = t.add_resource(iam.PolicyType(
     'ECRAccessPolicy',
@@ -94,6 +123,7 @@ ECRAccessPolicy = t.add_resource(iam.PolicyType(
                                    ],
                                    'Effect': 'Allow'},
                                   ]},
+    Roles=[Ref(InstanceRole), Ref(TaskRole)],
 ))
 
 # Policy to read/write to the config S3 bucket
@@ -108,6 +138,7 @@ S3AccessPolicy = t.add_resource(iam.PolicyType(
                                    ],
                                    'Effect': 'Allow'},
                                   ]},
+    Roles=[Ref(InstanceRole), Ref(TaskRole)],
 ))
 
 # Policy to read/write from the PS'
@@ -115,36 +146,66 @@ PSAccessPolicy = t.add_resource(iam.PolicyType(
     'PSAccessPolicy',
     PolicyName='shibboelth-ps',
     PolicyDocument={'Version': '2012-10-17',
-                    'Statement': [{'Action': ['ssm:GetParameters', 'ssm:ssm:PutParameter',
+                    'Statement': [{'Action': ['ssm:GetParameters', 'ssm:PutParameter',
                                               'ssm:DescribeParameters'],
                                    'Resource': ['arn:aws:ssm:*:*:parameter/shibboleth/*'],
                                    'Effect': 'Allow'
                                    },
                                   ]},
+    Roles=[Ref(InstanceRole), Ref(TaskRole)],
 ))
 
-# Create instance/task roles with the above policies
-# Instance Role
-InstanceRole = t.add_resource(iam.Role(
-    "InstanceRole",
-    AssumeRolePolicyDocument={
-        'Statement': [{
-            'Effect': 'Allow',
-            'Principal': {'Service': ['ec2.amazonaws.com']},
-            'Action': ["sts:AssumeRole"]
-        }]},
-    Policies=[Ref(ECRAccessPolicy),Ref(S3AccessPolicy),Ref(PSAccessPolicy)]
-))
-# Task Role
-TaskRole = t.add_resource(iam.Role(
-    "TaskRole",
-    AssumeRolePolicyDocument={
-        'Statement': [{
-            'Effect': 'Allow',
-            'Principal': {'Service': ['ecs-tasks.amazonaws.com']},
-            'Action': ["sts:AssumeRole"]
-        }]},
-    Policies=[Ref(ECRAccessPolicy),Ref(S3AccessPolicy),Ref(PSAccessPolicy)]
+# CodeBuild Service Policy
+CodeBuildServiceRolePolicy = t.add_resource(iam.PolicyType(
+    'CodeBuildServiceRolePolicy',
+    PolicyName='CodeBuildServiceRolePolicy',
+    PolicyDocument={"Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "CloudWatchLogsPolicy",
+                            "Effect": "Allow",
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Resource": [
+                                "*"
+                            ]
+                        },
+                        {
+                            "Sid": "CodeCommitPolicy",
+                            "Effect": "Allow",
+                            "Action": [
+                                "codecommit:GitPull"
+                            ],
+                            "Resource": [
+                                "*"
+                            ]
+                        },
+                        {
+                            "Sid": "S3GetObjectPolicy",
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:GetObject",
+                                "s3:GetObjectVersion"
+                            ],
+                            "Resource": [
+                                "*"
+                            ]
+                        },
+                        {
+                            "Sid": "S3PutObjectPolicy",
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:PutObject"
+                            ],
+                            "Resource": [
+                                "*"
+                            ]
+                        }
+                    ]},
+    Roles=[Ref(InstanceRole)],
 ))
 
 # Create CodeBuild Projects
@@ -174,6 +235,7 @@ ImageProject = codebuild.Project(
     Name='shibboleth-build',
     ServiceRole=Ref(InstanceRole),
     Source=ImageSource,
+    DependsOn=CodeBuildServiceRolePolicy
 )
 t.add_resource(ImageProject)
 
@@ -216,7 +278,6 @@ t.add_resource(ConfigProject)
 # Output ECR repository URL
 t.add_output(Output(
     "RepositoryURL",
-    template=t,
     Description="The docker repository URL",
     Value=Join("", [
         Ref(AWS_ACCOUNT_ID),
