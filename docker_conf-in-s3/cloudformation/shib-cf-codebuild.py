@@ -63,14 +63,15 @@ idp_duo_integrationKey = t.add_parameter(Parameter(
 # Create the ECR Repository
 ECRepository = t.add_resource(
     ecr.Repository(
-        'Repository'
+        "Repository",
+        RepositoryName="shibboleth"
     )
 )
 
 # Create the S3 Bucket for the Configuration
 S3Bucket = t.add_resource(
     s3.Bucket(
-        'ConfigBucket'
+        "ConfigBucket"
     )
 )
 
@@ -79,17 +80,18 @@ S3Bucket = t.add_resource(
 InstanceRole = t.add_resource(iam.Role(
     "InstanceRole",
     AssumeRolePolicyDocument={
-        'Statement': [{
-            'Effect': 'Allow',
-            'Principal': {'Service': ['ec2.amazonaws.com']},
-            'Action': ["sts:AssumeRole"]
-        }],
-        'Statement': [{
-            'Effect': 'Allow',
-            'Principal': {'Service': 'codebuild.amazonaws.com'},
-            "Action": "sts:AssumeRole"
-        }]
-    },
+        "Statement": [{
+                'Effect': 'Allow',
+                'Principal': {'Service': ['ec2.amazonaws.com']},
+                'Action': ["sts:AssumeRole"]
+            },
+            {
+                'Effect': 'Allow',
+                'Principal': {'Service': 'codebuild.amazonaws.com'},
+                "Action": "sts:AssumeRole"
+            }
+        ]
+    }
 ))
 
 # Task Role
@@ -106,8 +108,8 @@ TaskRole = t.add_resource(iam.Role(
 # Create the Policies and associate them with the above roles
 # Policy to read/write to the ECR Repository
 ECRAccessPolicy = t.add_resource(iam.PolicyType(
-    'ECRAccessPolicy',
-    PolicyName='shibboleth-ecr',
+    "ECRAccessPolicy",
+    PolicyName="shibboleth-ecr",
     PolicyDocument={'Version': '2012-10-17',
                     'Statement': [{'Action': ['ecr:GetAuthorizationToken'],
                                    'Resource': ['*'],
@@ -128,8 +130,8 @@ ECRAccessPolicy = t.add_resource(iam.PolicyType(
 
 # Policy to read/write to the config S3 bucket
 S3AccessPolicy = t.add_resource(iam.PolicyType(
-    'S3AccessPolicy',
-    PolicyName='shibboleth-s3',
+    "S3AccessPolicy",
+    PolicyName="shibboleth-s3",
     PolicyDocument={'Version': '2012-10-17',
                     'Statement': [{'Action': ['s3:Get*', 's3:List*', 's3:PutObject',
                                               's3:DeleteObject'],
@@ -143,7 +145,7 @@ S3AccessPolicy = t.add_resource(iam.PolicyType(
 
 # Policy to read/write from the PS'
 PSAccessPolicy = t.add_resource(iam.PolicyType(
-    'PSAccessPolicy',
+    "PSAccessPolicy",
     PolicyName='shibboelth-ps',
     PolicyDocument={'Version': '2012-10-17',
                     'Statement': [{'Action': ['ssm:GetParameters', 'ssm:PutParameter',
@@ -157,8 +159,8 @@ PSAccessPolicy = t.add_resource(iam.PolicyType(
 
 # CodeBuild Service Policy
 CodeBuildServiceRolePolicy = t.add_resource(iam.PolicyType(
-    'CodeBuildServiceRolePolicy',
-    PolicyName='CodeBuildServiceRolePolicy',
+    "CodeBuildServiceRolePolicy",
+    PolicyName="CodeBuildServiceRolePolicy",
     PolicyDocument={"Version": "2012-10-17",
                     "Statement": [
                         {
@@ -213,9 +215,9 @@ CodeBuildServiceRolePolicy = t.add_resource(iam.PolicyType(
 ImageArtifacts = codebuild.Artifacts(Type='NO_ARTIFACTS')
 
 ImageEnvironment = codebuild.Environment(
-    ComputeType='BUILD_GENERAL1_SMALL',
-    Image='aws/codebuild/docker:1.12.1',
-    Type='LINUX_CONTAINER',
+    ComputeType="BUILD_GENERAL1_SMALL",
+    Image="aws/codebuild/docker:1.12.1",
+    Type="LINUX_CONTAINER",
     EnvironmentVariables=[{'Name': 'AWS_DEFAULT_REGION', 'Value': 'ap-southeast-2'},
                           {'Name': 'AWS_ACCOUNT_ID', 'Value': Ref(AWS_ACCOUNT_ID)},
                           {'Name': 'IMAGE_REPO_NAME', 'Value': Ref(ECRepository)},
@@ -224,15 +226,15 @@ ImageEnvironment = codebuild.Environment(
 )
 
 ImageSource = codebuild.Source(
-    Location='https://github.com/jasonumiker/shibboleth3-aws-duo-config',
-    Type='GITHUB'
+    Location="https://github.com/jasonumiker/shibboleth3-aws-duo-config",
+    Type="GITHUB"
 )
 
 ImageProject = codebuild.Project(
     "ImageBuildProject",
     Artifacts=ImageArtifacts,
     Environment=ImageEnvironment,
-    Name='shibboleth-build',
+    Name="shibboleth-build",
     ServiceRole=Ref(InstanceRole),
     Source=ImageSource,
     DependsOn=CodeBuildServiceRolePolicy
@@ -243,9 +245,9 @@ t.add_resource(ImageProject)
 ConfigArtifacts = codebuild.Artifacts(Type='NO_ARTIFACTS')
 
 ConfigEnvironment = codebuild.Environment(
-    ComputeType='BUILD_GENERAL1_SMALL',
-    Image='aws/codebuild/docker:1.12.1',
-    Type='LINUX_CONTAINER',
+    ComputeType="BUILD_GENERAL1_SMALL",
+    Image="aws/codebuild/docker:1.12.1",
+    Type="LINUX_CONTAINER",
     EnvironmentVariables=[{'Name': 'idp_hostname', 'Value': Ref(idp_hostname)},
                           {'Name': 'idp_attributescope', 'Value': Ref(idp_attributescope)},
                           {'Name': 'idp_ldapURL', 'Value': Ref(idp_ldapURL)},
@@ -260,16 +262,16 @@ ConfigEnvironment = codebuild.Environment(
 )
 
 ConfigSource = codebuild.Source(
-    Location='https://github.com/jasonumiker/shibboleth3-aws-duo-config',
-    Type='GITHUB',
-    BuildSpec='buildspec_conf.yml'
+    Location="https://github.com/jasonumiker/shibboleth3-aws-duo-config",
+    Type="GITHUB",
+    BuildSpec="buildspec_conf.yml"
 )
 
 ConfigProject = codebuild.Project(
     "ConfigBuildProject",
     Artifacts=ConfigArtifacts,
     Environment=ConfigEnvironment,
-    Name='shibboleth-config-build',
+    Name="shibboleth-config-build",
     ServiceRole=Ref(InstanceRole),
     Source=ConfigSource,
 )

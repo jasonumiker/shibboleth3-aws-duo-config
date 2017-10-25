@@ -316,6 +316,17 @@
                 "AssumeRolePolicyDocument": {
                     "Statement": [
                         {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "ec2.amazonaws.com"
+                                ]
+                            }
+                        },
+                        {
                             "Action": "sts:AssumeRole",
                             "Effect": "Allow",
                             "Principal": {
@@ -358,6 +369,9 @@
             "Type": "AWS::IAM::Policy"
         },
         "Repository": {
+            "Properties": {
+                "RepositoryName": "shibboleth"
+            },
             "Type": "AWS::ECR::Repository"
         },
         "S3AccessPolicy": {
