@@ -1,0 +1,27 @@
+# AWS CodeBuild buildspec to build the Shibboleth redirect container image
+# This requires the following environment variables be set on the Project:
+# AWS_DEFAULT_REGION
+# AWS_ACCOUNT_ID
+# IMAGE_REPO_NAME
+# IMAGE_TAG
+
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION)
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - cd redirect_container
+      - sed -i s/idp.DOMAIN.com/$IDP_FQDN/g bounce.conf
+      - docker build -f Dockerfile -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker image...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
