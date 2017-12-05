@@ -1,6 +1,27 @@
 {
     "Description": "Template to deploy a Dockerised Shibboleth IdP Build Environment",
     "Outputs": {
+        "RedirectRepositoryURL": {
+            "Description": "The docker repository URL",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        {
+                            "Ref": "AWS::AccountId"
+                        },
+                        ".dkr.ecr.",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        ".amazonaws.com/",
+                        {
+                            "Ref": "RedirectRepository"
+                        }
+                    ]
+                ]
+            }
+        },
         "RepositoryURL": {
             "Description": "The docker repository URL",
             "Value": {
@@ -258,6 +279,33 @@
                                     ]
                                 }
                             ]
+                        },
+                        {
+                            "Action": [
+                                "ecr:*"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:ecr:",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            ":",
+                                            {
+                                                "Ref": "AWS::AccountId"
+                                            },
+                                            ":repository/",
+                                            {
+                                                "Ref": "RedirectRepository"
+                                            }
+                                        ]
+                                    ]
+                                }
+                            ]
                         }
                     ],
                     "Version": "2012-10-17"
@@ -385,6 +433,63 @@
                 ]
             },
             "Type": "AWS::IAM::Policy"
+        },
+        "RedirectBuildProject": {
+            "Properties": {
+                "Artifacts": {
+                    "Type": "NO_ARTIFACTS"
+                },
+                "Environment": {
+                    "ComputeType": "BUILD_GENERAL1_SMALL",
+                    "EnvironmentVariables": [
+                        {
+                            "Name": "IDP_FQDN",
+                            "Value": {
+                                "Ref": "hostname"
+                            }
+                        },
+                        {
+                            "Name": "AWS_DEFAULT_REGION",
+                            "Value": "ap-southeast-2"
+                        },
+                        {
+                            "Name": "AWS_ACCOUNT_ID",
+                            "Value": {
+                                "Ref": "AWS::AccountId"
+                            }
+                        },
+                        {
+                            "Name": "IMAGE_REPO_NAME",
+                            "Value": {
+                                "Ref": "RedirectRepository"
+                            }
+                        },
+                        {
+                            "Name": "IMAGE_TAG",
+                            "Value": "latest"
+                        }
+                    ],
+                    "Image": "aws/codebuild/docker:1.12.1",
+                    "PrivilegedMode": "true",
+                    "Type": "LINUX_CONTAINER"
+                },
+                "Name": "shibboleth-redirect-build",
+                "ServiceRole": {
+                    "Ref": "InstanceRole"
+                },
+                "Source": {
+                    "BuildSpec": "buildspec_redirect.yml",
+                    "Location": "https://github.com/jasonumiker/shibboleth3-aws-duo-config",
+                    "Type": "GITHUB"
+                }
+            },
+            "Type": "AWS::CodeBuild::Project"
+        },
+        "RedirectRepository": {
+            "Properties": {
+                "RepositoryName": "shibboleth-redirect"
+            },
+            "Type": "AWS::ECR::Repository"
         },
         "Repository": {
             "Properties": {
