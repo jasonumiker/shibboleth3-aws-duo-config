@@ -105,6 +105,12 @@ TaskRole = t.add_resource(iam.Role(
         }]},
 ))
 
+# Create Instance Profile
+InstanceProfile = t.add_resource(iam.InstanceProfile(
+    "InstanceProfile",
+    Roles=[Ref(InstanceRole)]
+))
+
 # Create the Policies and associate them with the above roles
 # Policy to read/write to the ECR Repository
 ECRAccessPolicy = t.add_resource(iam.PolicyType(
@@ -256,7 +262,7 @@ ConfigEnvironment = codebuild.Environment(
                           {'Name': 'idp_ldapdnFormat', 'Value': Ref(idp_ldapdnFormat)},
                           {'Name': 'idp_duo_apiHost', 'Value': Ref(idp_duo_apiHost)},
                           {'Name': 'idp_duo_integrationKey', 'Value': Ref(idp_duo_integrationKey)},
-                          {'Name': 's3path', 'Value': Ref(S3Bucket)},
+                          {'Name': 's3path', 'Value': Join("", ["s3://", Ref(S3Bucket)])},
                           {'Name': 'awsregion', 'Value': Ref(AWS_REGION)}],
     PrivilegedMode=True
 )

@@ -185,7 +185,15 @@
                         {
                             "Name": "s3path",
                             "Value": {
-                                "Ref": "ConfigBucket"
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "s3://",
+                                        {
+                                            "Ref": "ConfigBucket"
+                                        }
+                                    ]
+                                ]
                             }
                         },
                         {
@@ -310,6 +318,16 @@
                 }
             },
             "Type": "AWS::CodeBuild::Project"
+        },
+        "InstanceProfile": {
+            "Properties": {
+                "Roles": [
+                    {
+                        "Ref": "InstanceRole"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::InstanceProfile"
         },
         "InstanceRole": {
             "Properties": {
