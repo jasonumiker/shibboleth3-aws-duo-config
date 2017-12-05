@@ -30,6 +30,6 @@ sed -i s/SEALER_PASSWORD/$sealer_password/g /opt/shibboleth-idp/conf/idp.propert
 sed -i s/LDAP_PASSWORD/$ldap_password/g /opt/shibboleth-idp/conf/ldap.properties
 echo "idp.duo.secretKey = $duo_secretKey" >> /opt/shibboleth-idp/conf/authn/duo.properties
 
-#sed -i "s/^-Xmx.*$/-Xmx$JETTY_MAX_HEAP/g" /opt/shib-jetty-base/start.ini
+sed -i "s/^-Xmx.*$/-Xmx$JETTY_MAX_HEAP/g" /opt/shib-jetty-base/start.ini
 
 exec /etc/init.d/jetty run
