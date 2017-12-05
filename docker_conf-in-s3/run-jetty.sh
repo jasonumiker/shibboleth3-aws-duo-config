@@ -27,7 +27,7 @@ duo_secretKey=$(aws ssm get-parameters --region $AWSREGION --with-decryption --n
 # Put the secrets in the appropriate places
 export JETTY_ARGS="jetty.backchannel.sslContext.keyStorePassword=$backchannel_password"
 sed -i s/SEALER_PASSWORD/$sealer_password/g /opt/shibboleth-idp/conf/idp.properties
-sed -i s/LDAP_PASSWORD/$ldap_password/g /opt/shibboleth-idp/conf/ldap.properties
+sed -i "/idp.authn.LDAP.bindDNCredential=/c\idp.authn.LDAP.bindDNCredential= $ldap_password" /opt/shibboleth-idp/conf/ldap.properties
 echo "idp.duo.secretKey = $duo_secretKey" >> /opt/shibboleth-idp/conf/authn/duo.properties
 
 sed -i "s/^-Xmx.*$/-Xmx$JETTY_MAX_HEAP/g" /opt/shib-jetty-base/start.ini
