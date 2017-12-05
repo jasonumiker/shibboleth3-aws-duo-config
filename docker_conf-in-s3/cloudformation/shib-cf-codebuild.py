@@ -61,10 +61,18 @@ idp_duo_integrationKey = t.add_parameter(Parameter(
 ))
 
 # Create the ECR Repository
-ECRepository = t.add_resource(
+Repository = t.add_resource(
     ecr.Repository(
         "Repository",
         RepositoryName="shibboleth"
+    )
+)
+
+#Create the Redirect Repository
+RedirectRepository = t.add_resource(
+    ecr.Repository(
+        "RedirectRepository",
+        RepositoryName="shibboleth-redirect"
     )
 )
 
@@ -126,7 +134,17 @@ ECRAccessPolicy = t.add_resource(iam.PolicyType(
                                                  Ref(AWS_REGION),
                                                  ":", Ref(AWS_ACCOUNT_ID),
                                                  ":repository/",
-                                                 Ref(ECRepository)]
+                                                 Ref(Repository)]
+                                            ),
+                                   ],
+                                   'Effect': 'Allow'},
+                                  {'Action': ['ecr:*'],
+                                   'Resource': [
+                                       Join("", ["arn:aws:ecr:",
+                                                 Ref(AWS_REGION),
+                                                 ":", Ref(AWS_ACCOUNT_ID),
+                                                 ":repository/",
+                                                 Ref(RedirectRepository)]
                                             ),
                                    ],
                                    'Effect': 'Allow'},
@@ -226,7 +244,7 @@ ImageEnvironment = codebuild.Environment(
     Type="LINUX_CONTAINER",
     EnvironmentVariables=[{'Name': 'AWS_DEFAULT_REGION', 'Value': 'ap-southeast-2'},
                           {'Name': 'AWS_ACCOUNT_ID', 'Value': Ref(AWS_ACCOUNT_ID)},
-                          {'Name': 'IMAGE_REPO_NAME', 'Value': Ref(ECRepository)},
+                          {'Name': 'IMAGE_REPO_NAME', 'Value': Ref(Repository)},
                           {'Name': 'IMAGE_TAG', 'Value': 'latest'}],
     PrivilegedMode=True
 )
@@ -283,7 +301,39 @@ ConfigProject = codebuild.Project(
 )
 t.add_resource(ConfigProject)
 
-# Output ECR repository URL
+# Redirect Build
+RedirectArtifacts = codebuild.Artifacts(Type='NO_ARTIFACTS')
+
+RedirectEnvironment = codebuild.Environment(
+    ComputeType="BUILD_GENERAL1_SMALL",
+    Image="aws/codebuild/docker:1.12.1",
+    Type="LINUX_CONTAINER",
+    EnvironmentVariables=[{'Name': 'IDP_FQDN', 'Value': Ref(idp_hostname)},
+                          {'Name': 'AWS_DEFAULT_REGION', 'Value': 'ap-southeast-2'},
+                          {'Name': 'AWS_ACCOUNT_ID', 'Value': Ref(AWS_ACCOUNT_ID)},
+                          {'Name': 'IMAGE_REPO_NAME', 'Value': Ref(RedirectRepository)},
+                          {'Name': 'IMAGE_TAG', 'Value': 'latest'}
+                          ],
+    PrivilegedMode=True
+)
+
+RedirectSource = codebuild.Source(
+    Location="https://github.com/jasonumiker/shibboleth3-aws-duo-config",
+    Type="GITHUB",
+    BuildSpec="buildspec_redirect.yml"
+)
+
+RedirectProject = codebuild.Project(
+    "RedirectBuildProject",
+    Artifacts=RedirectArtifacts,
+    Environment=RedirectEnvironment,
+    Name="shibboleth-redirect-build",
+    ServiceRole=Ref(InstanceRole),
+    Source=RedirectSource,
+)
+t.add_resource(RedirectProject)
+
+# Output Shibboleth repository URL
 t.add_output(Output(
     "RepositoryURL",
     Description="The docker repository URL",
@@ -292,7 +342,20 @@ t.add_output(Output(
         ".dkr.ecr.",
         Ref(AWS_REGION),
         ".amazonaws.com/",
-        Ref(ECRepository)
+        Ref(Repository)
+    ]),
+))
+
+# Output Redirect repository URL
+t.add_output(Output(
+    "RedirectRepositoryURL",
+    Description="The docker repository URL",
+    Value=Join("", [
+        Ref(AWS_ACCOUNT_ID),
+        ".dkr.ecr.",
+        Ref(AWS_REGION),
+        ".amazonaws.com/",
+        Ref(RedirectRepository)
     ]),
 ))
 
