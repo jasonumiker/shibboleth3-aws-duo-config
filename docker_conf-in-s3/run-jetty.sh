@@ -9,7 +9,7 @@ export JAVA_HOME=/opt/jre-home
 export PATH=$PATH:$JAVA_HOME/bin
 
 # Determine what region we are in and save that as AWSREGION
-export AWSREGION =$(curl -s 169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//')
+export AWSREGION=$(curl -s 169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/.$//')
 
 # Download the config from S3PATH to /tmp and then move it to /opt/shibboleth-idp
 cd /tmp
