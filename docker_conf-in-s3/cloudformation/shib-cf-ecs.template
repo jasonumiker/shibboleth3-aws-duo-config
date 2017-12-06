@@ -1,0 +1,92 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "Cluster": {
+            "Description": "The ECS Cluster to deploy to.",
+            "Type": "String"
+        },
+        "RedirectImage": {
+            "Description": "The Redirect container image to deploy.",
+            "Type": "String"
+        },
+        "ShibbolethImage": {
+            "Description": "The Shibboleth container image to deploy.",
+            "Type": "String"
+        },
+        "TaskRoleARN": {
+            "Description": "The ARN of the role for the task.",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "RedirectService": {
+            "Properties": {
+                "Cluster": {
+                    "Ref": "Cluster"
+                },
+                "DesiredCount": 1,
+                "TaskDefinition": {
+                    "Ref": "RedirectTaskDefinition"
+                }
+            },
+            "Type": "AWS::ECS::Service"
+        },
+        "RedirectTaskDefinition": {
+            "Properties": {
+                "ContainerDefinitions": [
+                    {
+                        "Essential": "true",
+                        "Image": {
+                            "Ref": "RedirectImage"
+                        },
+                        "Name": "shibboleth-redirect",
+                        "PortMappings": [
+                            {
+                                "ContainerPort": 80
+                            }
+                        ]
+                    }
+                ],
+                "Cpu": "1024",
+                "Memory": "512",
+                "TaskRoleArn": {
+                    "Ref": "TaskRoleARN"
+                }
+            },
+            "Type": "AWS::ECS::TaskDefinition"
+        },
+        "ShibbolethService": {
+            "Properties": {
+                "Cluster": {
+                    "Ref": "Cluster"
+                },
+                "DesiredCount": 1,
+                "TaskDefinition": {
+                    "Ref": "ShibbolethTaskDefinition"
+                }
+            },
+            "Type": "AWS::ECS::Service"
+        },
+        "ShibbolethTaskDefinition": {
+            "Properties": {
+                "ContainerDefinitions": [
+                    {
+                        "Essential": "true",
+                        "Image": {
+                            "Ref": "ShibbolethImage"
+                        },
+                        "Name": "shibboleth",
+                        "PortMappings": [
+                            {
+                                "ContainerPort": 8080
+                            }
+                        ]
+                    }
+                ],
+                "Cpu": "1024",
+                "Memory": "1024"
+            },
+            "Type": "AWS::ECS::TaskDefinition"
+        }
+    }
+}
