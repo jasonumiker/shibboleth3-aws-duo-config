@@ -9,6 +9,18 @@
             "Description": "The Redirect container image to deploy.",
             "Type": "String"
         },
+        "RedirectLBTargetARN": {
+            "Description": "The ARN of the ALB Target Group for the redirect.",
+            "Type": "String"
+        },
+        "S3PATH": {
+            "Description": "The path to the config tarball in S3",
+            "Type": "String"
+        },
+        "ShibLBTargetARN": {
+            "Description": "The ARN of the ALB Target Group for Shibboleth.",
+            "Type": "String"
+        },
         "ShibbolethImage": {
             "Description": "The Shibboleth container image to deploy.",
             "Type": "String"
@@ -25,6 +37,15 @@
                     "Ref": "Cluster"
                 },
                 "DesiredCount": 1,
+                "LoadBalancers": [
+                    {
+                        "ContainerName": "shibboleth-redirect",
+                        "ContainerPort": 80,
+                        "TargetGroupArn": {
+                            "Ref": "RedirectLBTargetARN"
+                        }
+                    }
+                ],
                 "TaskDefinition": {
                     "Ref": "RedirectTaskDefinition"
                 }
@@ -39,6 +60,7 @@
                         "Image": {
                             "Ref": "RedirectImage"
                         },
+                        "MemoryReservation": 256,
                         "Name": "shibboleth-redirect",
                         "PortMappings": [
                             {
@@ -46,12 +68,7 @@
                             }
                         ]
                     }
-                ],
-                "Cpu": "1024",
-                "Memory": "512",
-                "TaskRoleArn": {
-                    "Ref": "TaskRoleARN"
-                }
+                ]
             },
             "Type": "AWS::ECS::TaskDefinition"
         },
@@ -61,6 +78,15 @@
                     "Ref": "Cluster"
                 },
                 "DesiredCount": 1,
+                "LoadBalancers": [
+                    {
+                        "ContainerName": "shibboleth",
+                        "ContainerPort": 8080,
+                        "TargetGroupArn": {
+                            "Ref": "ShibLBTargetARN"
+                        }
+                    }
+                ],
                 "TaskDefinition": {
                     "Ref": "ShibbolethTaskDefinition"
                 }
@@ -71,10 +97,19 @@
             "Properties": {
                 "ContainerDefinitions": [
                     {
+                        "Environment": [
+                            {
+                                "Name": "S3PATH",
+                                "Value": {
+                                    "Ref": "S3PATH"
+                                }
+                            }
+                        ],
                         "Essential": "true",
                         "Image": {
                             "Ref": "ShibbolethImage"
                         },
+                        "MemoryReservation": 1024,
                         "Name": "shibboleth",
                         "PortMappings": [
                             {
@@ -83,8 +118,9 @@
                         ]
                     }
                 ],
-                "Cpu": "1024",
-                "Memory": "1024"
+                "TaskRoleArn": {
+                    "Ref": "TaskRoleARN"
+                }
             },
             "Type": "AWS::ECS::TaskDefinition"
         }

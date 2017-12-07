@@ -3,7 +3,7 @@
 
 from troposphere import Parameter, Ref, Template
 from troposphere.ecs import (
-    Service, TaskDefinition, ContainerDefinition, PortMapping, LoadBalancer
+    Service, TaskDefinition, ContainerDefinition, PortMapping, LoadBalancer, Environment
 )
 
 t = Template()
@@ -13,6 +13,12 @@ cluster = t.add_parameter(Parameter(
     'Cluster',
     Type='String',
     Description='The ECS Cluster to deploy to.',
+))
+
+s3path = t.add_parameter(Parameter(
+    'S3PATH',
+    Type='String',
+    Description='The path to the config tarball in S3',
 ))
 
 shibboleth_image = t.add_parameter(Parameter(
@@ -33,16 +39,36 @@ task_role_arn = t.add_parameter(Parameter(
     Description='The ARN of the role for the task.',
 ))
 
+shibboleth_lb_target_arn = t.add_parameter(Parameter(
+    'ShibLBTargetARN',
+    Type='String',
+    Description='The ARN of the ALB Target Group for Shibboleth.',
+))
+
+redirect_lb_target_arn = t.add_parameter(Parameter(
+    'RedirectLBTargetARN',
+    Type='String',
+    Description='The ARN of the ALB Target Group for the redirect.',
+))
+
+
+
 shibboleth_task_definition = t.add_resource(TaskDefinition(
     'ShibbolethTaskDefinition',
-    Cpu='1024',
-    Memory='1024',
+    TaskRoleArn=Ref(task_role_arn),
     ContainerDefinitions=[
         ContainerDefinition(
             Name='shibboleth',
             Image=Ref(shibboleth_image),
+            MemoryReservation=1024,
             Essential=True,
-            PortMappings=[PortMapping(ContainerPort=8080)]
+            PortMappings=[PortMapping(ContainerPort=8080)],
+            Environment=[
+                Environment(
+                    Name='S3PATH',
+                    Value=Ref(s3path)
+                )
+            ]
         )
     ]
 ))
@@ -51,21 +77,25 @@ shibboleth_service = t.add_resource(Service(
     'ShibbolethService',
     Cluster=Ref(cluster),
     DesiredCount=1,
-    TaskDefinition=Ref(shibboleth_task_definition)
-
+    TaskDefinition=Ref(shibboleth_task_definition),
+    LoadBalancers=[
+        LoadBalancer(
+            ContainerName='shibboleth',
+            ContainerPort=8080,
+            TargetGroupArn=Ref(shibboleth_lb_target_arn)
+        )
+    ]
 ))
 
 redirect_task_definition = t.add_resource(TaskDefinition(
     'RedirectTaskDefinition',
-    Cpu='1024',
-    Memory='512',
-    TaskRoleArn=Ref(task_role_arn),
     ContainerDefinitions=[
         ContainerDefinition(
             Name='shibboleth-redirect',
             Image=Ref(redirect_image),
+            MemoryReservation=256,
             Essential=True,
-            PortMappings=[PortMapping(ContainerPort=80)]
+            PortMappings=[PortMapping(ContainerPort=80)],
         )
     ]
 ))
@@ -74,7 +104,14 @@ redirect_service = t.add_resource(Service(
     'RedirectService',
     Cluster=Ref(cluster),
     DesiredCount=1,
-    TaskDefinition=Ref(redirect_task_definition)
+    TaskDefinition=Ref(redirect_task_definition),
+    LoadBalancers=[
+        LoadBalancer(
+            ContainerName='shibboleth-redirect',
+            ContainerPort=80,
+            TargetGroupArn=Ref(redirect_lb_target_arn)
+        )
+    ]
 ))
 
 print(t.to_json())
